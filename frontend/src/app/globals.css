@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-plaster: #F8F6F2;
+  --color-charcoal: #1F2022;
+  --color-teak: #9E704C;
+  --color-linen: #EBE7E0;
+  --color-forest: #3B4E43;
+  
+  --font-sans: var(--font-plus-jakarta-sans), sans-serif;
+  --font-display: var(--font-outfit), sans-serif;
+}
+
+body {
+  background-color: var(--color-plaster);
+  color: var(--color-charcoal);
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+}
+
+/* Accessible focus ring style */
+*:focus-visible {
+  outline: 2px solid var(--color-teak);
+  outline-offset: 4px;
+}
+
