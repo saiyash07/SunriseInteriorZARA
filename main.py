@@ -182,6 +182,14 @@ async def bland_webhook(request: Request):
         # Latency/Cost Logger
         price = payload.get("price", 0)
         duration = payload.get("length", 0)  # Length in minutes or seconds
+        
+        if duration:
+            active_calls[call_id]["call_length"] = duration
+            total_seconds = int(duration * 60)
+            mins = total_seconds // 60
+            secs = total_seconds % 60
+            active_calls[call_id]["duration_formatted"] = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
+            active_calls[call_id]["cost_in_rupees"] = round(duration * 5.50, 2)
         print(f"\n================ CALL METRICS REPORT ================")
         print(f"Call ID: {call_id}")
         print(f"Duration: {duration} minutes")
@@ -219,6 +227,19 @@ async def get_transcript(call_sid: str):
                     session["status"] = "Error"
                 else:
                     session["status"] = bland_status.capitalize() if bland_status else session["status"]
+                
+                # Get call length and calculate cost
+                call_length = call_data.get("call_length", 0)
+                if not call_length:
+                    call_length = call_data.get("length", 0)
+                
+                if call_length:
+                    session["call_length"] = call_length
+                    total_seconds = int(call_length * 60)
+                    mins = total_seconds // 60
+                    secs = total_seconds % 60
+                    session["duration_formatted"] = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
+                    session["cost_in_rupees"] = round(call_length * 5.50, 2)
                 
                 # Update transcript
                 transcript_list = call_data.get("transcripts", [])

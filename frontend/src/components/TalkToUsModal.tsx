@@ -18,6 +18,8 @@ export default function TalkToUsModal() {
   const [transcript, setTranscript] = useState<Message[]>([]);
   const [callSid, setCallSid] = useState<string | null>(null);
   const [meetingAppointed, setMeetingAppointed] = useState(false);
+  const [callDuration, setCallDuration] = useState<string | null>(null);
+  const [callCost, setCallCost] = useState<number | null>(null);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
@@ -32,6 +34,8 @@ export default function TalkToUsModal() {
       setTranscript([]);
       setCallSid(null);
       setMeetingAppointed(false);
+      setCallDuration(null);
+      setCallCost(null);
       if (pollInterval.current) clearInterval(pollInterval.current);
       setIsOpen(true);
     };
@@ -118,6 +122,14 @@ export default function TalkToUsModal() {
           setMeetingAppointed(true);
         }
 
+        if (data.duration_formatted) {
+          setCallDuration(data.duration_formatted);
+        }
+
+        if (data.cost_in_rupees !== undefined) {
+          setCallCost(data.cost_in_rupees);
+        }
+
         if (data.transcript && data.transcript.length > lastLength) {
           setTranscript(data.transcript);
           lastLength = data.transcript.length;
@@ -131,6 +143,8 @@ export default function TalkToUsModal() {
   const resetState = () => {
     setStatus("idle");
     setStatusText("Request Live Callback");
+    setCallDuration(null);
+    setCallCost(null);
     if (pollInterval.current) clearInterval(pollInterval.current);
   };
 
@@ -240,6 +254,28 @@ export default function TalkToUsModal() {
                     <div className="mt-3 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center text-xs font-semibold flex items-center justify-center gap-1.5 animate-pulse">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Your Design Consultation is Appointed!
+                    </div>
+                  )}
+
+                  {status === "completed" && callDuration && callCost !== null && (
+                    <div className="w-full mt-4 p-4 bg-teak/5 border border-linen rounded-2xl space-y-2.5 text-charcoal text-left">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-teak text-center">
+                        Call Cost Summary
+                      </h4>
+                      <div className="border-t border-linen my-1.5"></div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-charcoal/60">Duration:</span>
+                        <span className="font-semibold text-charcoal">{callDuration}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-charcoal/60">Rate:</span>
+                        <span className="font-semibold text-charcoal">₹5.50 / min</span>
+                      </div>
+                      <div className="border-t border-dashed border-linen my-1.5"></div>
+                      <div className="flex justify-between text-sm font-bold">
+                        <span className="text-teak">Total Cost:</span>
+                        <span className="text-teak">₹{callCost.toFixed(2)}</span>
+                      </div>
                     </div>
                   )}
 
