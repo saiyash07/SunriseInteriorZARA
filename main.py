@@ -189,7 +189,7 @@ async def bland_webhook(request: Request):
             mins = total_seconds // 60
             secs = total_seconds % 60
             active_calls[call_id]["duration_formatted"] = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
-            active_calls[call_id]["cost_in_rupees"] = round(duration * 5.50, 2)
+            active_calls[call_id]["cost_in_rupees"] = round(duration * 5.70, 2)
         print(f"\n================ CALL METRICS REPORT ================")
         print(f"Call ID: {call_id}")
         print(f"Duration: {duration} minutes")
@@ -239,7 +239,7 @@ async def get_transcript(call_sid: str):
                     mins = total_seconds // 60
                     secs = total_seconds % 60
                     session["duration_formatted"] = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
-                    session["cost_in_rupees"] = round(call_length * 5.50, 2)
+                    session["cost_in_rupees"] = round(call_length * 5.70, 2)
                 
                 # Update transcript
                 transcript_list = call_data.get("transcripts", [])
