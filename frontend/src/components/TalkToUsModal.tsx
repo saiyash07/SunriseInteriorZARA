@@ -20,10 +20,30 @@ export default function TalkToUsModal() {
   const [meetingAppointed, setMeetingAppointed] = useState(false);
   const [callDuration, setCallDuration] = useState<string | null>(null);
   const [callCost, setCallCost] = useState<number | null>(null);
+  const [secondsTalked, setSecondsTalked] = useState(0);
   
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   
+  // Timer effect to count active conversation seconds
+  useEffect(() => {
+    if (status === "active") {
+      setSecondsTalked(0);
+      timerRef.current = setInterval(() => {
+        setSecondsTalked((prev) => prev + 1);
+      }, 1000);
+    } else if (status === "completed" || status === "error") {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [status]);
+
   // Listen for global open event
   useEffect(() => {
     const handleOpen = () => {
@@ -36,6 +56,7 @@ export default function TalkToUsModal() {
       setMeetingAppointed(false);
       setCallDuration(null);
       setCallCost(null);
+      setSecondsTalked(0);
       if (pollInterval.current) clearInterval(pollInterval.current);
       setIsOpen(true);
     };
@@ -52,6 +73,7 @@ export default function TalkToUsModal() {
   useEffect(() => {
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
@@ -145,6 +167,7 @@ export default function TalkToUsModal() {
     setStatusText("Request Live Callback");
     setCallDuration(null);
     setCallCost(null);
+    setSecondsTalked(0);
     if (pollInterval.current) clearInterval(pollInterval.current);
   };
 
@@ -257,7 +280,7 @@ export default function TalkToUsModal() {
                     </div>
                   )}
 
-                  {status === "completed" && callDuration && callCost !== null && (
+                  {status === "completed" && (
                     <div className="w-full mt-4 p-4 bg-teak/5 border border-linen rounded-2xl space-y-2.5 text-charcoal text-left">
                       <h4 className="text-[10px] font-bold uppercase tracking-wider text-teak text-center">
                         Call Cost Summary
@@ -265,16 +288,20 @@ export default function TalkToUsModal() {
                       <div className="border-t border-linen my-1.5"></div>
                       <div className="flex justify-between text-xs">
                         <span className="text-charcoal/60">Duration:</span>
-                        <span className="font-semibold text-charcoal">{callDuration}</span>
+                        <span className="font-semibold text-charcoal">
+                          {secondsTalked >= 60 
+                            ? `${Math.floor(secondsTalked / 60)}m ${secondsTalked % 60}s` 
+                            : `${secondsTalked} seconds`}
+                        </span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-charcoal/60">Rate:</span>
-                        <span className="font-semibold text-charcoal">₹5.50 / min</span>
+                        <span className="font-semibold text-charcoal">₹5.70 / min</span>
                       </div>
                       <div className="border-t border-dashed border-linen my-1.5"></div>
                       <div className="flex justify-between text-sm font-bold">
                         <span className="text-teak">Total Cost:</span>
-                        <span className="text-teak">₹{callCost.toFixed(2)}</span>
+                        <span className="text-teak">₹{((secondsTalked / 60) * 5.70).toFixed(2)}</span>
                       </div>
                     </div>
                   )}
